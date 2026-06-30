@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EarnPro - Earn Smart, Live Better</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+body{background:#f0f0f0;display:flex;justify-content:center;align-items:center;min-height:100vh}
+.app{width:100%;max-width:420px;min-height:860px;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.2)}
+.screen{display:none;min-height:860px}
+.screen.active{display:block}
+.btn{cursor:pointer;border:none;outline:none;transition:all .2s}
+.btn:active{transform:scale(.95)}
+.btn-primary{background:#2d8c5a;color:#fff;padding:14px;border-radius:12px;font-size:16px;font-weight:600;width:100%}
+.btn-primary:hover{background:#23704a}
+.input{width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;font-size:15px;outline:none}
+.input:focus{border-color:#2d8c5a}
+.card{background:#fff;border-radius:16px;padding:16px;margin:12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:420px;background:#fff;border-top:1px solid #eee;display:flex;justify-content:space-around;padding:8px;z-index:100}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px;cursor:pointer;font-size:11px;color:#888}
+.nav-item.active{color:#2d8c5a;font-weight:600}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#fff;padding:12px 20px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.15);z-index:1000;animation:slideDown .3s ease}
+@keyframes slideDown{from{opacity:0;transform:translate(-50%,-20px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.header{background:#fff;padding:16px;display:flex;justify-content:space-between;align-items:center}
+.hero{background:linear-gradient(135deg,#2d8c5a,#1e6b42);padding:24px;color:#fff;border-radius:0 0 24px 24px;margin:0 16px}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px}
+.stat-card{background:#fff;border-radius:16px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.pkg-card{background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:20px;padding:20px;margin:12px;color:#fff;border:2px solid #e94560}
+.pkg-card.free{border-color:#2d8c5a;background:linear-gradient(135deg,#1e3a2e,#162e21)}
+.pkg-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.pkg-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:16px 0}
+.pkg-stat{background:rgba(255,255,255,.1);border-radius:12px;padding:12px;text-align:center}
+.feature-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0}
+.feature{display:flex;align-items:center;gap:8px;font-size:13px}
+.check{color:#2d8c5a}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:200}
+.modal{background:#fff;border-radius:20px;padding:24px;width:90%;max-width:380px;animation:slideUp .3s ease}
+.tab-bar{display:flex;gap:8px;padding:12px;overflow-x:auto;background:#fff;border-bottom:1px solid #eee}
+.tab{padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;white-space:nowrap;background:#f0f0f0;color:#666}
+.tab.active{background:#2d8c5a;color:#fff}
+.withdraw-form{padding:16px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;margin-bottom:6px;font-size:14px;font-weight:600;color:#333}
+.payment-method{display:flex;align-items:center;gap:12px;padding:12px;border:2px solid #eee;border-radius:12px;margin-bottom:8px;cursor:pointer}
+.payment-method.selected{border-color:#2d8c5a;background:#f0fdf4}
+.ad-player{background:#000;border-radius:16px;overflow:hidden;margin:16px}
+.ad-content{height:300px;background:linear-gradient(135deg,#4c1d95,#5b21b6);display:flex;align-items:center;justify-content:center;color:#fff;text-align:center;padding:24px}
+.ad-controls{background:#282828;padding:12px;display:flex;align-items:center;gap:12px;color:#fff}
+.progress-bar{flex:1;height:4px;background:rgba(255,255,255,.2);border-radius:2px;position:relative}
+.progress-fill{height:100%;background:#e50914;border-radius:2px;transition:width 1s}
+.deposit-card{background:linear-gradient(135deg,#1e3a5f,#0f2440);border-radius:20px;padding:20px;color:#fff;margin:12px}
+.upload-area{border:2px dashed #ddd;border-radius:16px;padding:40px;text-align:center;cursor:pointer;margin:16px}
+.upload-area:hover{border-color:#2d8c5a;background:#f0fdf4}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+<!-- Login Screen -->
+<div class="screen active" id="screen-login">
+<div style="height:220px;background:linear-gradient(180deg,#eaf5ee,#cfe8d9);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden">
+<svg viewBox="0 0 400 220" style="position:absolute;inset:0;width:100%;height:100%">
+<ellipse cx="80" cy="60" rx="35" ry="12" fill="#fff" opacity=".7"/>
+<ellipse cx="320" cy="40" rx="40" ry="14" fill="#fff" opacity=".7"/>
+<path d="M0,180 Q100,120 200,150 T400,140 L400,220 L0,220 Z" fill="#7fb68d" opacity=".6"/>
+<path d="M0,200 Q150,160 280,180 T400,175 L400,220 L0,220 Z" fill="#5a9b6a" opacity=".7"/>
+</svg>
+<div style="width:80px;height:80px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.1);position:relative;z-index:1">
+<svg viewBox="0 0 40 40" style="width:50px;height:50px"><path d="M8,20 Q12,8 20,14 Q26,8 32,16 Q26,24 20,20 Q14,26 8,20 Z" fill="#2d6b3f"/><path d="M20,14 L20,28" stroke="#1a4a2a" stroke-width="2"/></svg>
+</div>
+</div>
+<div style="padding:32px 24px;background:#fff;border-radius:32px 32px 0 0;margin-top:-20px;position:relative;z-index:2;min-height:500px">
+<h1 style="text-align:center;font-size:28px;color:#1a1a1a;margin-bottom:8px">Welcome Back</h1>
+<p style="text-align:center;color:#888;font-size:14px;margin-bottom:32px">Sign in to continue to your account</p>
+<div style="margin-bottom:16px"><label style="font-size:14px;font-weight:600;color:#555">Email</label><input type="email" id="login-email" class="input" placeholder="Enter your email" style="margin-top:8px"></div>
+<div style="margin-bottom:16px"><label style="font-size:14px;font-weight:600;color:#555">Password</label><input type="password" id="login-password" class="input" placeholder="Enter your password" style="margin-top:8px"></div>
+<button class="btn btn-primary" onclick="handleLogin()" style="margin-bottom:24px">Login</button>
+<div style="display:flex;align-items:center;gap:12px;margin:24px 0"><div style="flex:1;height:1px;background:#ddd"></div><span style="color:#888;font-size:13px">Or continue with</span><div style="flex:1;height:1px;background:#ddd"></div></div>
+<div style="display:flex;justify-content:center;gap:16px">
+<button class="btn" onclick="handleGoogleLogin()" style="width:56px;height:56px;border:1px solid #ddd;border-radius:12px;font-size:24px;font-weight:bold;color:#4285F4">G</button>
+<button class="btn" style="width:56px;height:56px;border:1px solid #ddd;border-radius:12px;font-size:24px;font-weight:bold;color:#000"></button>
+<button class="btn" style="width:56px;height:56px;border:1px solid #ddd;border-radius:12px;font-size:24px;font-weight:bold;color:#1877F2">f</button>
+</div>
+<p style="text-align:center;margin-top:32px;color:#666;font-size:14px">Don't have an account? <a onclick="showScreen('register')" style="color:#2d8c5a;font-weight:600;cursor:pointer">Register</a></p>
+</div>
+</div>
+
+<!-- Register Screen -->
+<div class="screen" id="screen-register">
+<div style="background:linear-gradient(180deg,#2d8c5a,#1e6b42);padding:40px 24px 80px;text-align:center;color:#fff">
+<div style="width:80px;height:80px;border-radius:50%;background:#fff;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:36px;color:#2d8c5a">+</div>
+<h1 style="font-size:28px;margin-bottom:8px">Create Account</h1>
+<p style="opacity:.8;font-size:14px">Fill in the details to get started</p>
+</div>
+<div style="padding:24px;background:#fff;border-radius:32px 32px 0 0;margin-top:-40px;position:relative;z-index:2">
+<div style="margin-bottom:12px"><label style="font-size:14px;font-weight:600;color:#555">Full Name</label><input type="text" id="reg-name" class="input" placeholder="Enter your full name" style="margin-top:6px"></div>
+<div style="margin-bottom:12px"><label style="font-size:14px;font-weight:600;color:#555">Email</label><input type="email" id="reg-email" class="input" placeholder="Enter your email" style="margin-top:6px"></div>
+<div style="margin-bottom:12px"><label style="font-size:14px;font-weight:600;color:#555">Phone Number</label><input type="tel" id="reg-phone" class="input" placeholder="Enter your phone number" style="margin-top:6px"></div>
+<div style="margin-bottom:12px"><label style="font-size:14px;font-weight:600;color:#555">Password</label><input type="password" id="reg-password" class="input" placeholder="Enter your password" style="margin-top:6px"></div>
+<div style="margin-bottom:24px"><label style="font-size:14px;font-weight:600;color:#555">Confirm Password</label><input type="password" id="reg-confirm" class="input" placeholder="Confirm your password" style="margin-top:6px"></div>
+<button class="btn btn-primary" onclick="handleRegister()">Register</button>
+<p style="text-align:center;margin-top:24px;color:#666;font-size:14px">Already have an account? <a onclick="showScreen('login')" style="color:#2d8c5a;font-weight:600;cursor:pointer">Login</a></p>
+</div>
+</div>
+
+<!-- Dashboard Screen -->
+<div class="screen" id="screen-dashboard">
+<div class="header">
+<button class="btn" style="font-size:24px">☰</button>
+<div style="display:flex;align-items:center;gap:8px"><svg viewBox="0 0 40 40" style="width:40px;height:40px"><rect x="2" y="2" width="36" height="36" rx="6" fill="#2d8c5a"/><path d="M8,28 L14,20 L20,24 L26,14 L32,18" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg><div><div style="font-size:20px;font-weight:bold"><span style="color:#1a1a1a">Earn</span><span style="color:#2d8c5a">Pro</span></div><div style="font-size:9px;color:#888;letter-spacing:1px">EARN SMART, LIVE BETTER</div></div></div>
+<button class="btn" style="position:relative;font-size:24px"><span style="position:absolute;top:-4px;right:-4px;background:#e53e3e;color:#fff;font-size:10px;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center">3</span></button>
+</div>
+<div style="margin:12px 16px;background:linear-gradient(90deg,#1a4a2a,#2d6b3f);border-radius:30px;padding:12px 20px;display:flex;align-items:center;gap:12px;color:#fff;font-size:13px">
+<span style="background:#e53e3e;padding:4px 12px;border-radius:20px;font-size:10px;font-weight:bold">LIVE</span>
+<span style="font-weight:600">NEWS:</span>
+<span style="flex:1;overflow:hidden;white-space:nowrap">Welcome! Activate a package to start earning • Complete tasks & earn more</span>
+</div>
+<div class="hero">
+<div style="font-size:14px;opacity:.9">Welcome back,</div>
+<div style="font-size:28px;font-weight:bold;margin:8px 0" id="dash-name">User </div>
+<div class="badge" style="background:#fff;color:#2d8c5a" id="dash-pkg">Member</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px">
+<button class="btn" onclick="showScreen('packages')" style="background:linear-gradient(135deg,#1a3a5a,#0a2a4a);color:#fff;border-radius:16px;padding:16px;text-align:left">
+<div style="font-size:24px;margin-bottom:8px"></div><div style="font-weight:bold;font-size:14px">Packages</div><div style="font-size:11px;opacity:.7">Buy & Earn Daily</div>
+</button>
+<button class="btn" onclick="showScreen('referrals')" style="background:linear-gradient(135deg,#7e22ce,#5b21b6);color:#fff;border-radius:16px;padding:16px;text-align:left">
+<div style="font-size:24px;margin-bottom:8px"></div><div style="font-weight:bold;font-size:14px">Referrals</div><div style="font-size:11px;opacity:.7">Earn 40% Commission</div>
+</button>
+</div>
+<div class="stats-grid">
+<div class="stat-card"><div style="display:flex;justify-content:space-between;align-items:start"><div style="width:56px;height:56px;border-radius:50%;background:#2d8c5a;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff"></div><div style="width:40px;height:40px;border-radius:12px;background:rgba(45,140,90,.1);display:flex;align-items:center;justify-content:center;color:#2d8c5a"></div></div><div style="color:#888;font-size:13px;margin-top:12px">Task Earnings</div><div style="font-size:24px;font-weight:bold;color:#0f4a2a;margin-top:4px" id="stat-task">0.00</div><div style="background:rgba(45,140,90,.1);border-radius:10px;padding:10px;margin-top:12px;display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#2d8c5a;font-weight:600"><span>View Tasks</span><span>›</span></div></div>
+<div class="stat-card"><div style="display:flex;justify-content:space-between;align-items:start"><div style="width:56px;height:56px;border-radius:50%;background:#2d8c5a;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff">📋</div><div style="width:40px;height:40px;border-radius:12px;background:rgba(45,140,90,.1);display:flex;align-items:center;justify-content:center;color:#2d8c5a">↗</div></div><div style="color:#888;font-size:13px;margin-top:12px">Today Task Earning</div><div style="font-size:24px;font-weight:bold;color:#0f4a2a;margin-top:4px" id="stat-today">0.00</div><div style="background:rgba(45,140,90,.1);border-radius:10px;padding:10px;margin-top:12px;display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#2d8c5a;font-weight:600;cursor:pointer" onclick="showScreen('tasks')"><span>View Tasks</span><span>›</span></div></div>
+<div class="stat-card"><div style="display:flex;justify-content:space-between;align-items:start"><div style="width:56px;height:56px;border-radius:50%;background:#2d8c5a;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff"></div><div style="width:40px;height:40px;border-radius:12px;background:rgba(45,140,90,.1);display:flex;align-items:center;justify-content:center;color:#2d8c5a">↗</div></div><div style="color:#888;font-size:13px;margin-top:12px">Withdrawable Balance</div><div style="font-size:24px;font-weight:bold;color:#0f4a2a;margin-top:4px" id="stat-withdrawable">0.00</div><div style="background:rgba(45,140,90,.1);border-radius:10px;padding:10px;margin-top:12px;display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#2d8c5a;font-weight:600;cursor:pointer" onclick="showScreen('profile')"><span>Withdraw Now</span><span>›</span></div></div>
+<div class="stat-card"><div style="display:flex;justify-content:space-between;align-items:start"><div style="width:56px;height:56px;border-radius:50%;background:#2d8c5a;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff">🏦</div><div style="width:40px;height:40px;border-radius:12px;background:rgba(45,140,90,.1);display:flex;align-items:center;justify-content:center;color:#2d8c5a">↗</div></div><div style="color:#888;font-size:13px;margin-top:12px">Total Withdraw</div><div style="font-size:24px;font-weight:bold;color:#0f4a2a;margin-top:4px" id="stat-total">0.00</div><div style="background:rgba(45,140,90,.1);border-radius:10px;padding:10px;margin-top:12px;display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#2d8c5a;font-weight:600;cursor:pointer" onclick="showScreen('profile')"><span>View History</span><span>›</span></div></div>
+</div>
+<div style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);width:100%;max-width:420px;padding:0 16px">
+<button class="btn" onclick="openWhatsApp()" style="width:100%;background:linear-gradient(90deg,#2d8c5a,#1e6b42);color:#fff;border-radius:16px;padding:16px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 20px rgba(0,0,0,.15)">
+<div style="width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:28px"></div>
+<div style="flex:1;text-align:left"><div style="font-weight:bold;font-size:16px">Join WhatsApp Channel</div><div style="font-size:13px;opacity:.9">Get updates & news</div></div>
+<div style="background:#fff;color:#2d8c5a;padding:10px 20px;border-radius:12px;font-weight:bold;font-size:14px">Join Now ›</div>
+</button>
+</div>
+<div class="bottom-nav">
+<div class="nav-item active" onclick="showScreen('dashboard')"><div style="font-size:24px"></div>Dashboard</div>
+<div class="nav-item" onclick="showScreen('tasks')"><div style="font-size:24px">📋</div>Tasks</div>
+<div class="nav-item" onclick="showScreen('referrals')"><div style="font-size:24px"></div>Referrals</div>
+<div class="nav-item" onclick="showScreen('profile')"><div style="font-size:24px">👤</div>Profile</div>
+</div>
+</div>
+
+<!-- Packages Screen -->
+<div class="screen" id="screen-packages">
+<div style="background:#0a0e1a;color:#fff;min-height:860px;padding-bottom:80px">
+<div style="display:flex;align-items:center;gap:12px;padding:16px"><button class="btn" onclick="showScreen('dashboard')" style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.1);color:#fff;font-size:20px">←</button><h1 style="font-size:20px;font-weight:bold">Investment Plans</h1></div>
+<div style="margin:0 16px 16px;background:linear-gradient(135deg,rgba(59,130,246,.2),rgba(99,102,241,.2));border:1px solid rgba(59,130,246,.3);border-radius:16px;padding:20px">
+<div style="color:#60a5fa;font-size:13px;font-weight:bold;letter-spacing:1px;margin-bottom:8px">INVESTMENT PLANS</div>
+<div style="color:rgba(255,255,255,.8);font-size:14px">Choose a plan and start earning daily. All plans include daily withdrawal — no referral required.</div>
+</div>
+<div id="packages-list" style="padding:0 16px"></div>
+</div>
+</div>
+
+<!-- Tasks Screen -->
+<div class="screen" id="screen-tasks">
+<div style="background:linear-gradient(180deg,#0a1528,#1a1a3e);color:#fff;min-height:860px;padding-bottom:80px">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:16px">
+<button class="btn" onclick="showScreen('dashboard')" style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.1);color:#fff;font-size:20px">←</button>
+<h1 style="font-size:22px;font-weight:bold">Daily Tasks</h1>
+<div style="background:rgba(255,255,255,.1);border-radius:20px;padding:6px 12px;display:flex;align-items:center;gap:8px"><div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#fbbf24,#d97706);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:bold;color:#6b3a0a"></div><div style="font-weight:bold;font-size:14px" id="task-balance">0 <span style="font-size:11px;opacity:.7">PKR</span></div></div>
+</div>
+<div id="tasks-content" style="padding:0 16px"></div>
+</div>
+</div>
+
+<!-- Deposit Screen -->
+<div class="screen" id="screen-deposit">
+<div style="background:linear-gradient(180deg,#0a1528,#1a1a3e);color:#fff;min-height:860px;padding-bottom:80px">
+<div style="display:flex;align-items:center;gap:12px;padding:16px"><button class="btn" onclick="showScreen('profile')" style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.1);color:#fff;font-size:20px">←</button><h1 style="font-size:20px;font-weight:bold">Deposit Funds</h1></div>
+<div class="deposit-card">
+<div style="font-size:14px;opacity:.8;margin-bottom:8px">Current Deposit Balance</div>
+<div style="font-size:36px;font-weight:bold;color:#fbbf24" id="deposit-balance">PKR 0</div>
+<div style="font-size:12px;opacity:.6;margin-top:8px">Used for package purchases only</div>
+</div>
+<div style="padding:0 16px">
+<div style="font-size:14px;font-weight:600;margin-bottom:12px;color:rgba(255,255,255,.8)">1. Select Amount</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px" id="deposit-amounts"></div>
+<input type="number" id="deposit-custom" class="input" placeholder="Or enter custom amount (min PKR 50)" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff">
+<div style="font-size:14px;font-weight:600;margin:20px 0 12px;color:rgba(255,255,255,.8)">2. Choose Payment Method</div>
+<div id="deposit-methods"></div>
+<div style="font-size:14px;font-weight:600;margin:20px 0 12px;color:rgba(255,255,255,.8)">3. Upload Payment Screenshot</div>
+<div class="upload-area" onclick="document.getElementById('screenshot-input').click()">
+<div style="font-size:48px;margin-bottom:12px">📤</div>
+<div style="font-weight:600;margin-bottom:4px">Tap to Upload Screenshot</div>
+<div style="font-size:12px;opacity:.6">PNG, JPG up to 5MB</div>
+</div>
+<input type="file" id="screenshot-input" accept="image/*" style="display:none" onchange="handleScreenshot(this)">
+<div id="screenshot-preview" style="display:none;margin-top:12px;border-radius:16px;overflow:hidden;border:2px solid #2d8c5a"></div>
+<button class="btn btn-primary" onclick="handleDeposit()" style="margin-top:24px;background:linear-gradient(90deg,#fbbf24,#d97706);color:#000;font-size:16px;padding:16px">Submit Deposit</button>
+</div>
+</div>
+</div>
+
+<!-- Withdraw Screen -->
+<div class="screen" id="screen-withdraw">
+<div style="background:#0a0e1a;color:#fff;min-height:860px;padding-bottom:80px">
+<div style="display:flex;align-items:center;gap:12px;padding:16px"><button class="btn" onclick="showScreen('profile')" style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.1);color:#fff;font-size:20px">←</button><h1 style="font-size:20px;font-weight:bold">Withdraw Funds</h1></div>
+<div id="withdraw-content" style="padding:0 16px"></div>
+</div>
+</div>
+
+<!-- Referrals Screen -->
+<div class="screen" id="screen-referrals">
+<div style="background:linear-gradient(180deg,#1a0b3e,#6b3ec2);color:#fff;min-height:860px;padding-bottom:80px">
+<div style="padding:16px;text-align:center;position:relative">
+<button class="btn" onclick="showScreen('dashboard')" style="position:absolute;left:16px;top:16px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.1);color:#fff">←</button>
+<div style="padding-top:40px"><h1 style="font-size:28px;font-weight:bold">Invite Friends,<br><span style="color:#fbbf24">Earn Rewards!</span></h1><p style="opacity:.8;font-size:14px;margin-top:12px">Share your link and earn 40% commission</p></div>
+</div>
+<div style="background:#fff;border-radius:20px;padding:20px;margin:0 16px;color:#1a1a1a">
+<div style="font-weight:bold;font-size:18px;margin-bottom:12px">Your Referral Link</div>
+<div style="display:flex;gap:8px"><div style="flex:1;background:#faf5ff;border:2px dashed #d8b4fe;border-radius:12px;padding:12px;font-size:13px;color:#7e22ce;overflow:hidden;white-space:nowrap;text-overflow:ellipsis" id="ref-link">https://app.example.com/ref/user123</div><button class="btn" onclick="copyReferral()" style="background:linear-gradient(90deg,#7e22ce,#5b21b6);color:#fff;padding:12px 20px;border-radius:12px;font-weight:600">Copy</button></div>
+</div>
+<div style="background:#fff;border-radius:20px;padding:20px;margin:16px;color:#1a1a1a">
+<div style="font-weight:bold;font-size:18px;margin-bottom:12px">Referral History</div>
+<div id="referral-list"><div style="text-align:center;padding:32px;color:#888"><div style="font-size:48px;margin-bottom:12px"></div><div style="font-weight:600">No referrals yet</div><div style="font-size:13px;margin-top:4px">Share your link to start earning!</div></div></div>
+</div>
+<button class="btn" onclick="simulateReferral()" style="position:fixed;bottom:80px;right:20px;background:linear-gradient(90deg,#fbbf24,#f59e0b);color:#fff;padding:12px 20px;border-radius:30px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.2);display:flex;align-items:center;gap:8px"> Simulate Referral</button>
+</div>
+</div>
+
+<!-- Profile Screen -->
+<div class="screen" id="screen-profile">
+<div style="background:linear-gradient(180deg,#1a8a6a,#2d8c5a);padding:24px 16px 80px;color:#fff;text-align:center;position:relative">
+<button class="btn" onclick="showScreen('dashboard')" style="position:absolute;left:16px;top:16px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.1);color:#fff;font-size:20px">←</button>
+<div style="width:112px;height:112px;border-radius:50%;background:#fff;padding:4px;margin:40px auto 16px"><div style="width:100%;height:100%;border-radius:50%;background:linear-gradient(135deg,#666,#333);display:flex;align-items:center;justify-content:center;font-size:48px">👤</div></div>
+<h1 style="font-size:28px;font-weight:bold" id="profile-name">User</h1>
+<div style="font-size:14px;opacity:.8;margin-top:8px">Balance: <span style="font-weight:bold;color:#fbbf24" id="profile-balance">PKR 0</span></div>
+</div>
+<div style="padding:0 16px;margin-top:-40px;position:relative;z-index:2">
+<div class="card"><div style="display:flex;align-items:center;gap:12px;padding:8px"><div style="width:40px;height:40px;border-radius:50%;background:rgba(45,140,90,.1);display:flex;align-items:center;justify-content:center">📞</div><div style="flex:1;font-weight:600" id="profile-phone">+92 312 3456789</div></div><div style="display:flex;align-items:center;gap:12px;padding:8px;border-top:1px solid #f0f0f0"><div style="width:40px;height:40px;border-radius:50%;background:rgba(45,140,90,.1);display:flex;align-items:center;justify-content:center">✉️</div><div style="flex:1;font-weight:600" id="profile-email">user@example.com</div></div></div>
+<div class="card"><button class="btn" onclick="showScreen('withdraw')" style="width:100%;display:flex;align-items:center;gap:12px;padding:8px"><div style="width:40px;height:40px;border-radius:50%;background:#2d8c5a;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px"></div><div style="flex:1;text-align:left;font-weight:bold;font-size:18px">Withdraw Funds</div><span style="color:#888">›</span></button><div style="margin-top:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px"><button class="btn" onclick="selectPayment('EasyPaisa')" style="border:1px solid #ddd;border-radius:12px;padding:8px;background:#f9fafb"><div style="width:40px;height:40px;border-radius:10px;background:#dcfce7;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#16a34a;font-size:12px">EP</div><div style="font-size:10px;color:#666;margin-top:4px">EasyPaisa</div></button><button class="btn" onclick="selectPayment('JazzCash')" style="border:1px solid #ddd;border-radius:12px;padding:8px;background:#f9fafb"><div style="width:40px;height:40px;border-radius:10px;background:#fee2e2;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#dc2626;font-size:12px">JC</div><div style="font-size:10px;color:#666;margin-top:4px">JazzCash</div></button><button class="btn" onclick="selectPayment('NayaPay')" style="border:1px solid #ddd;border-radius:12px;padding:8px;background:#f9fafb"><div style="width:40px;height:40px;border-radius:10px;background:#ffedd5;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#ea580c;font-size:12px">NP</div><div style="font-size:10px;color:#666;margin-top:4px">NayaPay</div></button><button class="btn" onclick="selectPayment('SadaPay')" style="border:1px solid #ddd;border-radius:12px;padding:8px;background:#f9fafb"><div style="width:40px;height:40px;border-radius:10px;background:#dbeafe;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#2563eb;font-size:12px">SP</div><div style="font-size:10px;color:#666;margin-top:4px">SadaPay</div></button></div></div>
+<div class="card" style="padding:0;overflow:hidden"><button class="btn" onclick="showScreen('deposit')" style="width:100%;display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid #f0f0f0"><div style="width:40px;height:40px;border-radius:12px;background:rgba(45,140,90,.1);display:flex;align-items:center;justify-content:center;font-size:20px"></div><div style="flex:1;text-align:left;font-weight:600">Deposit Funds</div><span style="color:#888">›</span></button><button class="btn" onclick="showScreen('packages')" style="width:100%;display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid #f0f0f0"><div style="width:40px;height:40px;border-radius:12px;background:rgba(45,140,90,.1);display:flex;align-items:center;justify-content:center;font-size:20px">💎</div><div style="flex:1;text-align:left;font-weight:600">Upgrade Package</div><span style="color:#888">›</span></button><button class="btn" onclick="showToast('Withdraw History: PKR '+state.totalWithdraw)" style="width:100%;display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid #f0f0f0"><div style="width:40px;height:40px;border-radius:12px;background:rgba(45,140,90,.1);display:flex;align-items:center;justify-content:center;font-size:20px"></div><div style="flex:1;text-align:left;font-weight:600">Withdraw History</div><span style="color:#888">›</span></button><button class="btn" onclick="showToast('Balance: PKR '+state.withdrawableBalance)" style="width:100%;display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid #f0f0f0"><div style="width:40px;height:40px;border-radius:12px;background:rgba(45,140,90,.1);display:flex;align-items:center;justify-content:center;font-size:20px">📊</div><div style="flex:1;text-align:left;font-weight:600">Balance History</div><span style="color:#888">›</span></button><button class="btn" onclick="showToast('Change password coming soon')" style="width:100%;display:flex;align-items:center;gap:12px;padding:16px"><div style="width:40px;height:40px;border-radius:12px;background:rgba(45,140,90,.1);display:flex;align-items:center;justify-content:center;font-size:20px">🔒</div><div style="flex:1;text-align:left;font-weight:600">Change Password</div><span style="color:#888">›</span></button></div>
+<button class="btn" onclick="handleLogout()" style="width:100%;background:#fff;color:#e53e3e;font-weight:bold;padding:16px;border-radius:16px;margin-top:16px;box-shadow:0 2px 8px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px">🚪 Logout</button>
+</div>
+<div class="bottom-nav">
+<div class="nav-item" onclick="showScreen('dashboard')"><div style="font-size:24px"></div>Home</div>
+<div class="nav-item" onclick="showToast('Transactions')"><div style="font-size:24px">⇄</div>Transactions</div>
+<div class="nav-item active" onclick="showScreen('profile')"><div style="font-size:24px">👤</div>Profile</div>
+<div class="nav-item" onclick="openWhatsApp()"><div style="font-size:24px">🎧</div>Support</div>
+<div class="nav-item" onclick="showToast('Settings coming soon')"><div style="font-size:24px">⚙️</div>Settings</div>
+</div>
+</div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+// State Management
+const state={name:'',email:'',phone:'',isLoggedIn:false,currentPackage:{name:'FREE',price:0,daily:16,minWithdraw:150},taskEarnings:0,withdrawableBalance:0,todayTaskEarning:0,totalWithdraw:0,referralEarning:0,adsWatchedToday:0,maxAdsPerDay:1,freePlanActivated:false,depositBalance:0,deposits:[],referrals:[]};
+
+const PACKAGES=[
+{name:'FREE',price:0,daily:16,minWithdraw:150,icon:'',color:'#2d8c5a'},
+{name:'VIP 1',price:225,daily:70,minWithdraw:20,icon:'',color:'#f97316'},
+{name:'VIP 2',price:500,daily:150,minWithdraw:20,icon:'',color:'#f97316'},
+{name:'VIP 3',price:800,daily:220,minWithdraw:20,icon:'',color:'#f97316'},
+{name:'VIP 4',price:1500,daily:450,minWithdraw:20,icon:'',color:'#f97316'},
+{name:'VIP 5',price:2500,daily:750,minWithdraw:20,icon:'',color:'#f97316'},
+{name:'VIP 6',price:3500,daily:950,minWithdraw:20,icon:'',color:'#f97316'},
+{name:'VIP 7',price:5000,daily:1400,minWithdraw:20,icon:'',color:'#f97316'},
+{name:'VIP 8',price:8000,daily:2250,minWithdraw:20,icon:'',color:'#f97316'},
+{name:'VIP 9',price:10000,daily:2700,minWithdraw:20,icon:'',color:'#f97316'},
+{name:'VIP 10',price:15000,daily:4100,minWithdraw:20,icon:'',color:'#f97316'},
+{name:'VIP 11',price:25000,daily:7000,minWithdraw:20,icon:'',color:'#f97316'},
+{name:'VIP 12',price:50000,daily:14000,minWithdraw:20,icon:'',color:'#f97316'},
+{name:'VIP 13',price:100000,daily:28000,minWithdraw:20,icon:'',color:'#f97316'}
+];
+
+const PAYMENT_ACCOUNTS={EasyPaisa:{name:'TEHSIN ULLAH',number:'03019016682'},JazzCash:{name:'TEHSIN ULLAH',number:'03019016682'},NayaPay:{name:'TEHSIN ULLAH',number:'03319397920'},SadaPay:{name:'TEHSIN ULLAH',number:'03019016682'}};
+
+let selectedPayment='';
+let adTimer=null;
+
+function showScreen(name){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+name).classList.add('active');if(name==='dashboard')updateDashboard();if(name==='packages')renderPackages();if(name==='tasks')renderTasks();if(name==='profile')updateProfile();if(name==='deposit')updateDeposit();if(name==='withdraw')renderWithdraw();if(name==='referrals')updateReferrals()}
+
+function updateDashboard(){document.getElementById('dash-name').textContent=(state.name||'User')+' ';document.getElementById('dash-pkg').textContent=state.currentPackage.name+' Member';document.getElementById('stat-task').textContent=formatCurrency(state.taskEarnings);document.getElementById('stat-today').textContent=formatCurrency(state.todayTaskEarning);document.getElementById('stat-withdrawable').textContent=formatCurrency(state.withdrawableBalance);document.getElementById('stat-total').textContent=formatCurrency(state.totalWithdraw)}
+
+function updateProfile(){document.getElementById('profile-name').textContent=state.name||'User';document.getElementById('profile-balance').textContent='PKR '+state.withdrawableBalance.toLocaleString();document.getElementById('profile-phone').textContent=state.phone||'+92 312 3456789';document.getElementById('profile-email').textContent=state.email||'user@example.com'}
+
+function formatCurrency(amount){if(!amount||amount===0)return'0.00';return'PKR '+amount.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})}
+
+function handleLogin(){const email=document.getElementById('login-email').value;const password=document.getElementById('login-password').value;if(!email||!password){showToast('Please enter email and password','error');return}showToast('Login successful!','success');state.isLoggedIn=true;state.name=email.split('@')[0];state.email=email;setTimeout(()=>showScreen('dashboard'),500)}
+
+function handleGoogleLogin(){const names=['Ahmed Khan','Ali Raza','Bilal Sheikh','Usman Malik'];const name=names[Math.floor(Math.random()*names.length)];const email=name.toLowerCase().replace(/\s+/g,'.')+'@gmail.com';state.name=name;state.email=email;state.isLoggedIn=true;showToast('Signed in as '+name,'success');setTimeout(()=>showScreen('dashboard'),500)}
+
+function handleRegister(){const name=document.getElementById('reg-name').value;const email=document.getElementById('reg-email').value;const phone=document.getElementById('reg-phone').value;const password=document.getElementById('reg-password').value;const confirm=document.getElementById('reg-confirm').value;if(!name||!email||!phone||!password||!confirm){showToast('Please fill all fields','error');return}if(password!==confirm){showToast('Passwords do not match','error');return}if(password.length<8){showToast('Password must be at least 8 characters','error');return}state.name=name;state.email=email;state.phone=phone;state.isLoggedIn=true;showToast('Welcome '+name+'!','success');setTimeout(()=>showScreen('dashboard'),600)}
+
+function handleLogout(){showToast('Logged out successfully','success');state.name='';state.email='';state.phone='';state.isLoggedIn=false;state.currentPackage={name:'FREE',price:0,daily:16,minWithdraw:150};state.taskEarnings=0;state.withdrawableBalance=0;state.todayTaskEarning=0;state.totalWithdraw=0;state.referralEarning=0;state.adsWatchedToday=0;state.freePlanActivated=false;state.depositBalance=0;state.deposits=[];state.referrals=[];setTimeout(()=>showScreen('login'),600)}
+
+function renderPackages(){const list=document.getElementById('packages-list');list.innerHTML=PACKAGES.map((pkg,i)=>{const isCurrent=state.currentPackage.name===pkg.name;const isFree=pkg.price===0;return`<div class="pkg-card ${isFree?'free':''}" style="margin-bottom:16px"><div class="pkg-header"><div style="display:flex;align-items:center;gap:12px"><div style="width:56px;height:56px;border-radius:16px;background:${pkg.color};display:flex;align-items:center;justify-content:center;font-size:28px">${pkg.icon}</div><div><div style="font-size:22px;font-weight:bold">${pkg.name}</div><div style="font-size:12px;opacity:.6">LIFETIME PLAN</div></div></div>${!isCurrent&&pkg.price>0?`<div style="font-size:22px;font-weight:bold;color:#f97316">PKR ${pkg.price.toLocaleString()}</div>`:''}${isCurrent?'<div style="background:#2d8c5a;color:#fff;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:bold">ACTIVE</div>':''}</div><div class="pkg-stats"><div class="pkg-stat"><div style="font-size:11px;opacity:.6;margin-bottom:4px">INVEST</div><div style="font-size:18px;font-weight:bold">${isFree?'FREE':pkg.price.toLocaleString()} <span style="font-size:11px">PKR</span></div></div><div class="pkg-stat" style="background:rgba(59,130,246,.3)"><div style="font-size:11px;color:#60a5fa;margin-bottom:4px">DAILY</div><div style="font-size:18px;font-weight:bold;color:#60a5fa">${pkg.daily.toLocaleString()} <span style="font-size:11px">PKR</span></div></div><div class="pkg-stat"><div style="font-size:11px;opacity:.6;margin-bottom:4px">TOTAL</div><div style="font-size:18px;font-weight:bold">Unlimited</div></div></div><div class="feature-list">${['Daily Withdrawal','No Referral Required','Lifetime validity','Daily profit PKR '+pkg.daily.toLocaleString(),'Min Withdrawal: '+pkg.minWithdraw+' PKR'].map(f=>`<div class="feature"><span class="check">✓</span><span>${f}</span></div>`).join('')}</div><button class="btn" onclick="buyPackage(${i})" style="width:100%;padding:14px;border-radius:14px;font-weight:bold;font-size:15px;${isCurrent?'background:#555;color:#999':isFree?'background:linear-gradient(90deg,#2d8c5a,#16a34a);color:#fff':'background:linear-gradient(90deg,#f97316,#ef4444);color:#fff'}">${isCurrent?'✓ Activated':isFree?'Activate Free Plan':'Invest PKR '+pkg.price.toLocaleString()}</button></div>`}).join('')}
+
+function buyPackage(idx){const pkg=PACKAGES[idx];if(state.currentPackage.name===pkg.name){showToast('Already activated!','info');return}if(pkg.price>0&&state.depositBalance<pkg.price){showToast('Insufficient deposit! Need PKR '+pkg.price.toLocaleString()+'. Please deposit first.','error');setTimeout(()=>showScreen('deposit'),1000);return}showToast('Activating '+pkg.name+'...','info');setTimeout(()=>{state.currentPackage=pkg;if(pkg.price>0)state.depositBalance-=pkg.price;if(pkg.price===0)state.freePlanActivated=true;showToast(pkg.name+' activated! Daily: PKR '+pkg.daily.toLocaleString(),'success');setTimeout(()=>showScreen('dashboard'),800)},1000)}
+
+function renderTasks(){const content=document.getElementById('tasks-content');const maxAds=state.currentPackage.price===0?(state.freePlanActivated?1:0):10;const canWatch=maxAds>0&&state.adsWatchedToday<maxAds;const earnings=state.currentPackage.daily;document.getElementById('task-balance').innerHTML=state.taskEarnings.toLocaleString()+' <span style="font-size:11px;opacity:.7">PKR</span>';if(!state.freePlanActivated&&state.currentPackage.price===0){content.innerHTML=`<div style="text-align:center;margin-top:48px"><div style="width:96px;height:96px;border-radius:50%;background:rgba(168,85,247,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:48px">🔒</div><h2 style="font-size:24px;font-weight:bold;margin-bottom:12px">No Active Package</h2><p style="opacity:.6;font-size:14px">Activate a package to start earning</p></div><div style="background:linear-gradient(135deg,rgba(74,222,128,.2),rgba(16,185,129,.2));border:2px dashed #4ade80;border-radius:20px;padding:24px;text-align:center;margin-top:24px"><div style="font-size:48px;margin-bottom:12px"></div><h3 style="font-size:20px;font-weight:bold;color:#4ade80;margin-bottom:12px">Activate FREE Plan</h3><p style="opacity:.8;font-size:14px;margin-bottom:16px">Get <b style="color:#fbbf24">16 PKR per day</b> by watching <b>1 ad</b>!</p><button class="btn" onclick="activateFree()" style="width:100%;background:linear-gradient(90deg,#4ade80,#16a34a);color:#fff;padding:14px;border-radius:14px;font-weight:bold;font-size:15px">⚡ Activate FREE Plan Now</button><div style="font-size:12px;opacity:.5;margin-top:12px">No payment required • Lifetime access</div></div>`}else if(!canWatch){content.innerHTML=`<div style="text-align:center;margin-top:48px"><div style="font-size:64px;margin-bottom:16px"></div><h2 style="font-size:24px;font-weight:bold;color:#4ade80;margin-bottom:12px">All Done for Today!</h2><p style="opacity:.7;margin-bottom:24px">Come back tomorrow<br>Total earned: PKR ${state.todayTaskEarning.toLocaleString()}</p><button class="btn" onclick="showScreen('dashboard')" style="width:100%;background:linear-gradient(90deg,#4ade80,#16a34a);color:#fff;padding:14px;border-radius:14px;font-weight:bold">Back to Dashboard</button></div>`}else{content.innerHTML=`<div style="text-align:center;margin-top:32px"><div style="width:128px;height:128px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#ec4899);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;box-shadow:0 10px 40px rgba(124,58,237,.3);animation:pulse 2s infinite"><div style="font-size:64px;margin-left:8px">▶</div></div><h2 style="font-size:28px;font-weight:bold;margin-bottom:12px">Ready to Earn?</h2><p style="opacity:.7;margin-bottom:24px">Watch a short ad and earn <b style="color:#fbbf24">PKR ${earnings}</b></p><button class="btn" onclick="startAd()" style="width:100%;background:linear-gradient(90deg,#7c3aed,#ec4899);color:#fff;padding:16px;border-radius:16px;font-weight:bold;font-size:18px;box-shadow:0 10px 40px rgba(124,58,237,.3)">▶ Watch Ad Now</button><div style="font-size:12px;opacity:.5;margin-top:16px">${maxAds} ad${maxAds>1?'s':''} per day • 15 seconds each</div></div><div id="ad-container" style="display:none;margin-top:24px"></div>`}}
+
+function activateFree(){state.freePlanActivated=true;state.maxAdsPerDay=1;showToast('FREE Plan activated! 1 ad/day = 16 PKR','success');renderTasks()}
+
+function startAd(){const container=document.getElementById('ad-container');container.style.display='block';let time=0;let progress=0;container.innerHTML=`<div class="ad-player"><div class="ad-content" id="ad-visual"><div><div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);padding:8px 16px;border-radius:30px;margin-bottom:16px"><div style="width:8px;height:8px;background:#ef4444;border-radius:50%;animation:pulse 1s infinite"></div><span style="font-weight:600">LIVE NOW</span></div><h2 style="font-size:32px;font-weight:bold;margin-bottom:12px">Earn <span style="color:#fbbf24">PKR 5000</span><br>Daily From Home</h2><p style="opacity:.8;font-size:14px">Join 1M+ users already earning</p><div style="margin-top:16px;display:flex;justify-content:center;gap:4px">${[1,2,3,4,5].map(()=>'⭐').join('')}<span style="margin-left:8px;opacity:.7">4.9/5</span></div></div></div><div class="ad-controls"><button style="font-size:20px">⏸</button><div style="font-size:12px;font-family:monospace" id="ad-time">00:00</div><div class="progress-bar"><div class="progress-fill" id="ad-progress" style="width:0%"></div></div><div style="font-size:12px;font-family:monospace">00:15</div><button style="font-size:18px">🔊</button></div></div><div style="background:rgba(26,26,62,.8);border-radius:16px;padding:16px;margin-top:16px;border:1px solid rgba(168,85,247,.3)"><div style="display:flex;align-items:center;gap:12px"><div style="width:48px;height:48px;border-radius:12px;background:rgba(168,85,247,.2);display:flex;align-items:center;justify-content:center;font-size:24px">📺</div><div style="flex:1"><div style="font-weight:bold">Watching Ad...</div><div style="font-size:12px;opacity:.6">Please wait</div></div><div style="font-size:24px;font-weight:bold;color:#a855f7" id="ad-percent">0%</div></div><div style="height:8px;background:rgba(255,255,255,.1);border-radius:4px;margin-top:12px;overflow:hidden"><div id="ad-bar" style="height:100%;background:linear-gradient(90deg,#7c3aed,#a855f7,#c084fc);border-radius:4px;transition:width 1s;width:0%"></div></div></div>`;adTimer=setInterval(()=>{time++;progress=(time/15)*100;document.getElementById('ad-time').textContent='00:'+String(time).padStart(2,'0');document.getElementById('ad-progress').style.width=progress+'%';document.getElementById('ad-percent').textContent=Math.floor(progress)+'%';document.getElementById('ad-bar').style.width=progress+'%';if(time>=15){clearInterval(adTimer);showAdSuccess()}},1000)}
+
+function showAdSuccess(){const earnings=state.currentPackage.daily;document.getElementById('ad-container').innerHTML=`<div style="text-align:center;padding:32px"><div style="width:112px;height:112px;border-radius:50%;background:linear-gradient(135deg,#4ade80,#16a34a);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:56px;box-shadow:0 0 40px rgba(74,222,128,.4);animation:pulse 1s infinite">✓</div><h2 style="font-size:36px;font-weight:bold;margin-bottom:8px">Success!</h2><p style="opacity:.6;margin-bottom:8px">You earned</p><div style="font-size:48px;font-weight:bold;color:#4ade80;margin-bottom:24px">${earnings} PKR</div><button class="btn" onclick="claimAdReward(${earnings})" style="width:100%;background:linear-gradient(180deg,#4ade80,#16a34a);color:#fff;padding:16px;border-radius:16px;font-weight:bold;font-size:18px">Awesome!</button></div>`}
+
+function claimAdReward(amount){state.taskEarnings+=amount;state.todayTaskEarning+=amount;state.adsWatchedToday++;showToast('+'+amount+' PKR earned!','success');renderTasks()}
+
+function updateDeposit(){document.getElementById('deposit-balance').textContent='PKR '+state.depositBalance.toLocaleString();const amounts=[100,250,500,1000,2500,5000,10000];document.getElementById('deposit-amounts').innerHTML=amounts.map(a=>`<button class="btn" onclick="selectDepositAmount(${a})" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:12px;border-radius:12px;font-weight:bold">${a>=1000?(a/1000)+'K':a}</button>`).join('');const methods=['EasyPaisa','JazzCash','NayaPay','SadaPay'];document.getElementById('deposit-methods').innerHTML=methods.map(m=>{const acc=PAYMENT_ACCOUNTS[m];return`<div class="payment-method ${selectedPayment===m?'selected':''}" onclick="selectDepositMethod('${m}')" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff"><div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,${m==='EasyPaisa'?'#22c55e,#16a34a':m==='JazzCash'?'#ef4444,#dc2626':m==='NayaPay'?'#f97316,#ea580c':'#3b82f6,#2563eb'});display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:14px">${m.substring(0,2).toUpperCase()}</div><div style="flex:1"><div style="font-weight:bold">${m}</div><div style="font-size:12px;opacity:.6">${acc.name}</div><div style="font-size:13px;color:#fbbf24;font-family:monospace">${acc.number}</div></div></div>`}).join('')}
+
+function selectDepositAmount(amt){document.getElementById('deposit-custom').value=amt}
+function selectDepositMethod(method){selectedPayment=method;updateDeposit()}
+function handleScreenshot(input){if(input.files&&input.files[0]){const reader=new FileReader();reader.onload=e=>{const preview=document.getElementById('screenshot-preview');preview.style.display='block';preview.innerHTML=`<img src="${e.target.result}" style="width:100%;height:200px;object-fit:cover"><div style="position:absolute;top:8px;right:8px;background:#2d8c5a;color:#fff;padding:4px 12px;border-radius:20px;font-size:12px">✓ Uploaded</div>`};reader.readAsDataURL(input.files[0])}}
+
+function handleDeposit(){const amount=parseFloat(document.getElementById('deposit-custom').value);if(!amount||amount<50){showToast('Minimum deposit: PKR 50','error');return}if(!selectedPayment){showToast('Please select a payment method','error');return}if(!document.getElementById('screenshot-input').files.length){showToast('Please upload payment screenshot','error');return}showToast('Processing deposit...','info');setTimeout(()=>{state.depositBalance+=amount;state.deposits.push({amount,date:new Date().toLocaleDateString(),method:selectedPayment});showToast('PKR '+amount+' deposit submitted!','success');updateDeposit()},2000)}
+
+function renderWithdraw(){const content=document.getElementById('withdraw-content');const minWithdraw=state.currentPackage.minWithdraw||20;const hasPaid=state.currentPackage.price>0;if(!hasPaid&&state.withdrawableBalance<minWithdraw){content.innerHTML=`<div style="background:linear-gradient(135deg,rgba(59,130,246,.2),rgba(99,102,241,.2));border:1px solid rgba(59,130,246,.3);border-radius:16px;padding:20px;margin-bottom:16px"><div style="font-size:13px;opacity:.7;margin-bottom:8px">Available Balance</div><div style="font-size:32px;font-weight:bold;color:#60a5fa">PKR ${state.withdrawableBalance.toFixed(2)}</div><div style="font-size:12px;opacity:.5;margin-top:8px">Minimum withdrawal: PKR ${minWithdraw}</div></div><div style="background:linear-gradient(135deg,rgba(168,85,247,.2),rgba(236,72,153,.2));border:1px solid rgba(168,85,247,.3);border-radius:16px;padding:20px;margin-bottom:16px"><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#a855f7,#ec4899);display:flex;align-items:center;justify-content:center;font-size:24px">🎁</div><div><div style="font-weight:bold;font-size:16px">Unlock Withdrawals!</div><div style="font-size:12px;opacity:.7">Buy any package to start withdrawing</div></div></div><p style="font-size:13px;opacity:.8;margin-bottom:16px">Invite friends and earn <b style="color:#fbbf24">40% commission</b> on every package they buy!</p><button class="btn" onclick="showScreen('deposit')" style="width:100%;background:linear-gradient(90deg,#fbbf24,#f59e0b);color:#000;padding:14px;border-radius:14px;font-weight:bold">💰 Deposit & Buy Package to Unlock</button></div><div style="background:linear-gradient(135deg,rgba(251,191,36,.1),rgba(245,158,11,.1));border:2px solid rgba(251,191,36,.3);border-radius:16px;padding:20px"><div style="display:flex;gap:12px"><div style="width:32px;height:32px;border-radius:50%;background:#f59e0b;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold">i</div><div><h3 style="font-weight:bold;margin-bottom:8px;color:#92400e">محترم صارف,</h3><p style="font-size:13px;color:#92400e;line-height:1.6">اپنا ریفرل بیلنس بڑھانے کے لیے دوستوں کو مدعو کریں۔ جب آپ کا دوست کوئی پیکیج خریدتا ہے تو آپ کو <b>40% کمیشن</b> ملتا ہے جو آپ واپس لے سکتے ہیں۔</p></div></div></div>`}else{content.innerHTML=`<div style="margin-bottom:16px"><label style="font-size:13px;opacity:.7;display:block;margin-bottom:8px">Withdrawal Amount (PKR)</label><input type="number" id="w-amount" class="input" placeholder="Min: ${minWithdraw} PKR" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;font-size:16px"><div style="font-size:11px;opacity:.4;margin-top:4px">Minimum withdrawal: ${minWithdraw} PKR</div></div><div style="margin-bottom:16px"><label style="font-size:13px;opacity:.7;display:block;margin-bottom:8px">Withdrawal Method</label><select id="w-method" class="input" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff"><option value="">Select Method</option>${Object.keys(PAYMENT_ACCOUNTS).map(m=>`<option value="${m}">${m}</option>`).join('')}</select></div><div style="margin-bottom:16px"><label style="font-size:13px;opacity:.7;display:block;margin-bottom:8px">Account / Mobile Number</label><input type="text" id="w-account" class="input" placeholder="Enter your account number" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff"></div><div style="margin-bottom:24px"><label style="font-size:13px;opacity:.7;display:block;margin-bottom:8px">Account Holder Name</label><input type="text" id="w-name" class="input" placeholder="Enter account holder name" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff"></div><button class="btn" onclick="handleWithdraw(${minWithdraw})" style="width:100%;background:linear-gradient(90deg,#3b82f6,#2563eb);color:#fff;padding:16px;border-radius:16px;font-weight:bold;font-size:16px">Request Withdrawal</button><div style="text-align:center;font-size:13px;opacity:.4;margin-top:12px">Withdrawals are processed within 24-48 hours.</div><div style="background:linear-gradient(135deg,rgba(251,191,36,.1),rgba(245,158,11,.1));border:2px solid rgba(251,191,36,.3);border-radius:16px;padding:20px;margin-top:24px"><div style="display:flex;gap:12px"><div style="width:32px;height:32px;border-radius:50%;background:#f59e0b;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold">i</div><div><h3 style="font-weight:bold;margin-bottom:8px;color:#92400e">محترم صارف ${state.name||'user'},</h3><p style="font-size:13px;color:#92400e;line-height:1.6">آپ کی واپسی کی حد <b>PKR ${state.withdrawableBalance.toFixed(2)}</b> ہے۔ براہ کرم اپنے ریفرل بڑھائیں تاکہ آپ کی واپسی کی حد بڑھ سکے۔</p></div></div></div><div style="background:linear-gradient(135deg,rgba(59,130,246,.2),rgba(99,102,241,.2));border:1px solid rgba(59,130,246,.3);border-radius:16px;padding:20px;margin-top:16px"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:13px;color:#93c5fd">Withdrawable Balance</span><span style="font-size:11px;background:rgba(59,130,246,.3);padding:4px 10px;border-radius:20px;color:#93c5fd">Referral Commission</span></div><div style="font-size:28px;font-weight:bold;color:#93c5fd">PKR ${state.withdrawableBalance.toFixed(2)}</div><div style="font-size:12px;opacity:.5;margin-top:8px">From 40% referral commission</div></div><div style="background:linear-gradient(135deg,rgba(74,222,128,.1),rgba(16,185,129,.1));border:1px solid rgba(74,222,128,.3);border-radius:16px;padding:16px;margin-top:12px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="color:#4ade80">📈</span><span style="font-size:13px;color:#86efac;font-weight:600">Your Task Earnings</span></div><div style="font-size:20px;font-weight:bold;color:#86efac">PKR ${state.taskEarnings.toFixed(2)}</div><div style="font-size:11px;opacity:.5;margin-top:4px">Keep watching ads to grow your earnings!</div></div>`}}
+
+function handleWithdraw(minWithdraw){const amount=parseFloat(document.getElementById('w-amount').value);const method=document.getElementById('w-method').value;const account=document.getElementById('w-account').value;const name=document.getElementById('w-name').value;if(!method){showToast('Please select payment method','error');return}if(!account){showToast('Enter account/mobile number','error');return}if(!name){showToast('Enter account holder name','error');return}if(!amount||amount<minWithdraw){showToast('Minimum withdraw: PKR '+minWithdraw,'error');return}if(amount>state.withdrawableBalance){showToast('Insufficient withdrawable balance','error');return}const fee=amount*.10;const receive=amount-fee;showToast('Processing...','info');setTimeout(()=>{state.withdrawableBalance-=amount;state.totalWithdraw+=receive;showToast('Withdrawal request submitted! PKR '+receive.toFixed(0)+' via '+method,'success');renderWithdraw()},2000)}
+
+function updateReferrals(){document.getElementById('ref-link').textContent='https://app.example.com/ref/'+(state.name||'user').toLowerCase().replace(/\s+/g,'')+'123';const list=document.getElementById('referral-list');if(state.referrals.length===0){list.innerHTML=`<div style="text-align:center;padding:32px;color:#888"><div style="font-size:48px;margin-bottom:12px"></div><div style="font-weight:600">No referrals yet</div><div style="font-size:13px;margin-top:4px">Share your link to start earning!</div></div>`}else{list.innerHTML=state.referrals.map(r=>`<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f0f0f0"><div style="width:48px;height:48px;border-radius:50%;background:${r.avatar};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;font-size:18px">${r.name[0]}</div><div style="flex:1"><div style="font-weight:600">${r.name}</div><div style="font-size:12px;color:#888"><span style="background:#dcfce7;color:#16a34a;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">Joined</span> • ${r.date}</div></div><div style="text-align:right"><div style="font-weight:bold;color:#10b981">+ PKR ${r.earn.toLocaleString()}</div><div style="font-size:11px;color:#888">${r.pkg}</div></div></div>`).join('')}}
+
+function copyReferral(){navigator.clipboard.writeText(document.getElementById('ref-link').textContent);showToast('Link copied!','success')}
+
+function simulateReferral(){const names=['Ahmed Khan','Fatima Ali','Bilal Ahmed','Ayesha Malik'];const avatars=['linear-gradient(135deg,#818cf8,#6366f1)','linear-gradient(135deg,#fb7185,#e11d48)','linear-gradient(135deg,#2dd4bf,#14b8a6)','linear-gradient(135deg,#fbbf24,#f59e0b)'];const pkgs=[{pkg:'250 PKR Package',earn:100},{pkg:'500 PKR Package',earn:200},{pkg:'1000 PKR Package',earn:400},{pkg:'2500 PKR Package',earn:1000}];const idx=Math.floor(Math.random()*names.length);const ref={name:names[idx],date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),pkg:pkgs[idx].pkg,earn:pkgs[idx].earn,avatar:avatars[idx]};state.referrals.unshift(ref);state.withdrawableBalance+=ref.earn;state.referralEarning+=ref.earn;showToast(ref.name+' joined! +PKR '+ref.earn,'success');updateReferrals()}
+
+function selectPayment(method){selectedPayment=method;showToast(method+' selected','success')}
+
+function openWhatsApp(){window.open('https://whatsapp.com/channel/0029VaXXXXXXXXXX','_blank')}
+
+function showToast(msg,type='success'){const container=document.getElementById('toast-container');const toast=document.createElement('div');toast.className='toast';toast.style.borderLeft=type==='error'?'4px solid #e53e3e':type==='info'?'4px solid #3b82f6':'4px solid #2d8c5a';toast.innerHTML=`<div style="display:flex;align-items:center;gap:12px"><span style="font-size:20px">${type==='error'?'❌':type==='info'?'️':'✓'}</span><span style="font-size:14px;font-weight:600;color:#1a1a1a">${msg}</span></div>`;container.appendChild(toast);setTimeout(()=>toast.remove(),3000)}
+
+// Initialize
+showScreen('login');
+</script>
+</body>
+</html>
